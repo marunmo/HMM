@@ -11,9 +11,9 @@ from hmmlearn.hmm import GaussianHMM
 X=np.random.rand(100,2)
 
 # Run Gaussian HMM
-print "fitting to HMM and decoding ..."
+print "fitting these numbers to HMM"
 
-# Make an HMM instance and execute fit
+#Create an HMM instance with 4 components and using diagonal covariance
 model = GaussianHMM(n_components=4, covariance_type="diag", n_iter=1000).fit(X)
 
 # Predict the optimal sequence of internal hidden state
