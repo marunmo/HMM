@@ -73,15 +73,31 @@ def training(trainX,trainZ,k,startprob_org,transmat_org,means_org,covars_org):
     startprob=model_p.startprob_
 
     l = list(permutations(range(0, k)))
-    min_means=1000
+    acctrain=1000
     min_covars=0
+    min_acc=1000
 
     for p in l:
-        var_means=means
-        var_means[:,:]=var_means[p,:]
-        if(min_means>norm(var_means-means_org,2)):
-            min_means=norm(var_means-means_org,2)
+        var_trainZ=trainZ
+        for i in range(trainZ.shape[0]):
+            var_trainZ[i]=p[trainZ[i]]
+        min_acc=np.mean( hidden_states == var_trainZ )
+        if(min_acc<acctrain):
+            acctrain=min_acc
             perm_m=p
+
+    # acctrain=norm(hidden_states-var_trainZ,2)
+
+    # for p in l:
+    #     var_means=means
+    #     var_means[:,:]=var_means[p,:]
+    #     if(min_means>norm(var_means-means_org,2)):
+    #         min_means=norm(var_means-means_org,2)
+    #         perm_m=p
+
+    var_means = means
+    var_means[:, :] = var_means[perm_m, :]
+    min_means = norm(var_means - means_org, 2)
 
     var_start=startprob.reshape(k,1)
     var_start[:,:]=var_start[perm_m,:]
@@ -98,10 +114,7 @@ def training(trainX,trainZ,k,startprob_org,transmat_org,means_org,covars_org):
         min_covars=min_covars+norm(var_covars[i]-covars_org[i],2)
     min_covars=min_covars/k
 
-    var_trainZ=trainZ
-    for i in range(trainZ.shape[0]):
-        var_trainZ[i]=perm_m[trainZ[i]]
-    acctrain=norm(hidden_states-var_trainZ,2)
+
 
     return min_start,min_transmat,min_means,min_covars,acctrain,model_p,perm_m
 
@@ -113,7 +126,8 @@ def testing(testX, testZ, k, model_p,perm_m):
     var_testZ=testZ
     for i in range(testZ.shape[0]):
         var_testZ[i]=perm_m[testZ[i]]
-    acctest=norm(predZ-var_testZ,2)
+    #acctest=norm(predZ-var_testZ,2)
+    acctest = np.mean(predZ == var_testZ)
 
     return acctest
 
@@ -123,9 +137,11 @@ if __name__=="__main__":
     print "Setting experiment values"
 
     input=genfromtxt('experiment_values.csv', delimiter=',',dtype='int')
-    outputarr = np.empty([41,12])
+    input=input[1:,1:]
+    outputarr = np.empty([51,12])
 
-    for i in range(54,94):
+
+    for i in range(0,51):
         exp,n,k,l=input[i,:]
         trainX, trainZ,startprob_org,transmat_org,means_org,covars_org,testX, testZ=createSample(n,l,k)
         startTimeTrain = datetime.now()
@@ -138,10 +154,10 @@ if __name__=="__main__":
 
         timeTest=datetime.now()-endTimeTrain
 
-        outputarr[i-54,:]= exp,timeTrain.total_seconds(),timeTest.total_seconds(),n,k,l,acctrain,acctest,min_start,min_transmat,min_means,min_covars
+        outputarr[i,:]= exp,timeTrain.total_seconds(),timeTest.total_seconds(),n,k,l,acctrain,acctest,min_start,min_transmat,min_means,min_covars
 
 
-    np.savetxt('exp3.out',outputarr, delimiter=',')
+    np.savetxt('experimentall.out',outputarr, delimiter=',')
 
 
 
