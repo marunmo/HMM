@@ -4,4 +4,4 @@ python:
 install: 
   - pip install hmmlearn
   - pip install pytest
-script: pytest
+script: pytest test_sample.py
