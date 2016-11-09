@@ -6,4 +6,4 @@ python:
   - "pypy"
 install:
   - pip install hmmlearn
-script: pytest
+script: bash test_script.sh
