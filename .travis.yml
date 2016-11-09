@@ -3,5 +3,5 @@ python:
   - "2.7"
   - "pypy"
 install: 
-  - pip install --user hmmlearn
+  - pip install hmmlearn
 script: pytest test_sample.py
